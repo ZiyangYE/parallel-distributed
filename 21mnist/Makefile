@@ -27,7 +27,6 @@
 #
 vers :=
 vers += cpu_base
-vers += cuda_base
 #vers += fast
 
 #
@@ -40,7 +39,8 @@ vers += cuda_base
 # is HUGE)
 #
 flags :=
-flags += -O0
+flags += -O3
+flags += -g
 #flags += -O3
 flags += -DMAX_BATCH_SIZE=64
 flags += -DARRAY_INDEX_CHECK=0
@@ -111,6 +111,7 @@ fast_cc := mnist.cc
 #
 
 cpu_base_flags := 
+cpu_base_flags += -fopenmp
 cpu_base_ldflags := 
 
 cuda_base_flags := 

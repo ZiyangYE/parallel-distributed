@@ -6,8 +6,6 @@
 #include "include/mnist_data.h"
 #include "include/mnist.h"
 
-
-
 /**
    @brief grab a mini batch (B training samples), forward, backward and update.
    @return the average loss of the mini batch.
@@ -39,7 +37,7 @@ static void train(MNIST<maxB,C,H,W,nC> * mnist,
 }
 
 /**
-   @brief forward compute B_validate validation samples 
+   @brief forward compute B_validate validation samples
    (taking several mini batches if necessary)
    @return the average loss of the validation data
  */
@@ -83,6 +81,9 @@ static void test(MNIST<maxB,C,H,W,nC> * mnist,
    Occasionally evaluate the network with validation data.
    @return the average loss of the validation data
  */
+
+int glo[128];
+
 int main(int argc, char ** argv) {
   cmdline_opt opt = parse_args(argc, argv);
   if (opt.error || opt.help) usage(argv[0]);
@@ -96,6 +97,14 @@ int main(int argc, char ** argv) {
   /* logger */
   logger lgr;
   lgr.start_log(opt);
+
+
+  #pragma omp parallel for
+  for(int i=0;i<128;i++){
+    glo[i]=i;
+    if(i==0)printf("Number of threads: %d \n", omp_get_num_threads());
+  }
+
   /* random number */
   rnd_gen_t rg;
   rg.seed(opt.weight_seed);

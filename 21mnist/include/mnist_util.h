@@ -15,6 +15,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <ieee754.h>
+#include <omp.h>
 
 #if __CUDACC__
 #include "cuda_util.h"

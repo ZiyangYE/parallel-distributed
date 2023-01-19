@@ -320,35 +320,35 @@ struct Convolution2D {
     gb.set_n0(OC);
     gx.set_n0(B);
     tensor<real,maxB,IC,H,W>& x = *x_ptr;
-    for (idx_t oc = 0; oc < OC; oc++) {   // output channel
-      for (idx_t ic = 0; ic < IC; ic++) { // input channel
-        for (idx_t di = 0; di < K; di++) { // kernel pixel
-          for (idx_t dj = 0; dj < K; dj++) { // kernel pixel
-            real v = 0.0;
-            for (idx_t s = 0; s < B; s++) { // training samples
+    #pragma omp parallel for
+    for (idx_t s = 0; s < B; s++) { // training samples
+
+      for (idx_t oc = 0; oc < OC; oc++) {   // output channel
+        for (idx_t ic = 0; ic < IC; ic++) { // input channel
+          for (idx_t di = 0; di < K; di++) { // kernel pixel
+            for (idx_t dj = 0; dj < K; dj++) { // kernel pixel
+              real v = 0.0;
               for (idx_t i = 0; i < H - K + 1; i++) { // sample pixel
                 for (idx_t j = 0; j < W - K + 1; j++) { // sample pixel
                   v += gy(s,oc,i,j) * x(s,ic,i+di,j+dj);
                 }
               }
+            gw(oc,ic,di,dj) += v;
             }
-            gw(oc,ic,di,dj) = v;
           }
         }
       }
-    }
-    for (idx_t oc = 0; oc < OC; oc++) {
-      real v = 0.0;
-      for (idx_t s = 0; s < B; s++) {
+
+      for (idx_t oc = 0; oc < OC; oc++) {   // output channel
+        real v1 = 0.0;
         for (idx_t i = 0; i < H - K + 1; i++) {
           for (idx_t j = 0; j < W - K + 1; j++) {
-            v += gy(s,oc,i,j);
+            v1 += gy(s,oc,i,j);
           }
         }
+        gb(oc) += v1;
       }
-      gb(oc) = v;
-    }
-    for (idx_t s = 0; s < B; s++) {
+
       for (idx_t ic = 0; ic < IC; ic++) {
         for (idx_t i = 0; i < H; i++) {
           for (idx_t j = 0; j < W; j++) {
@@ -367,6 +367,7 @@ struct Convolution2D {
           }
         }
       }
+      
     }
   }
   /**
